@@ -2,5 +2,5 @@
 pragma solidity ^0.8.19;
 
 interface IVerifier {
-
-} // TODO
+    function verify() external view returns (bool);
+}

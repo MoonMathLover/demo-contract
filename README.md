@@ -16,3 +16,7 @@
 ###### 4. reveal randomness
 
 ###### 5. reveal the result of lootbox
+
+## Reference
+
+- https://github.com/Anish-Agnihotri/MultiRaffle

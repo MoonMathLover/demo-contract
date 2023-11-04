@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 // import {Errors} from "./Errors.sol";
-import {Events} from "./Events.sol";
+import {Events} from "../utils/Events.sol";
 
 struct TypeRandao {
     uint256 blockNumber;
