@@ -13,12 +13,14 @@ import {TypeRandao, LibRandao} from "../src/library/LibRandao.sol";
 // source
 import {DemeDay} from "../src/DemoDay.sol";
 import {StageTimelock} from "../src/StageTimelock.sol";
+import {Verifier} from "../src/Verifier.sol";
 import {MockVerifier} from "./mock/MockVerifier.sol";
 
 contract BaseTest is Test {
     DemeDay internal _demo;
     MockVerifier internal _verifier;
     bytes32 internal _verifierCodehash;
+    Verifier internal _realVerifier;
 
     Account internal _admin;
     Account internal _user;
@@ -32,5 +34,6 @@ contract BaseTest is Test {
         _demo = new DemeDay(_admin.addr);
         _verifier = new MockVerifier();
         _verifierCodehash = address(_verifier).codehash;
+        _realVerifier = new Verifier();
     }
 }

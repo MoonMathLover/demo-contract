@@ -79,7 +79,7 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function mint(
         uint8 contribution
-    ) external timelock(Constants.STAGE_2_USER) {
+    ) external payable timelock(Constants.STAGE_2_USER) {
         _safeMint(msg.sender, _counter.increase());
         unchecked {
             _userContributeSwapTimes += uint256(contribution);
@@ -145,8 +145,13 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
         return _verifierAddr;
     }
 
-    function verify() external view returns (bool) {
-        return IVerifier(_verifierAddr).verify();
+    function verify(
+        uint[2] calldata pA,
+        uint[2][2] calldata pB,
+        uint[2] calldata pC,
+        uint[5001] calldata pubSignals
+    ) external view returns (bool) {
+        return IVerifier(_verifierAddr).verifyProof(pA, pB, pC, pubSignals);
     }
 
     function tokenURI(

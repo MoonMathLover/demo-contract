@@ -2,5 +2,10 @@
 pragma solidity ^0.8.19;
 
 interface IVerifier {
-    function verify() external view returns (bool);
+    function verifyProof(
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[5001] calldata _pubSignals
+    ) external view returns (bool);
 }

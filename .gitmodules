@@ -7,3 +7,6 @@
 [submodule "lib/solady"]
 	path = lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "lib/fisher-yates"]
+	path = lib/fisher-yates
+	url = https://github.com/MoonMathLover/fisher-yates
