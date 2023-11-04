@@ -3,7 +3,11 @@ pragma solidity ^0.8.19;
 
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ERC721} from "../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {SSTORE2} from "../lib/solady/src/utils/SSTORE2.sol";
+import {LibString} from "../lib/solady/src/utils/LibString.sol";
+
 import {StageTimelock} from "./StageTimelock.sol";
+import {IVerifier} from "./interface/IVerifier.sol";
 
 // library
 import {TypeCounter, LibCounter} from "./library/LibCounter.sol";
@@ -14,7 +18,6 @@ import {Constants} from "./utils/Constants.sol";
 import {Errors} from "./utils/Errors.sol";
 import {Events} from "./utils/Events.sol";
 
-// TODO token uri
 contract DemeDay is Ownable, ERC721, StageTimelock {
     using LibCounter for TypeCounter;
     using LibRandao for TypeRandao;
@@ -36,6 +39,9 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
 
     /// @dev user contributed swap times
     uint256 internal _userContributeSwapTimes;
+
+    /// @dev
+    address internal _pointer;
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Constructor
@@ -87,7 +93,6 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Stage 3
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    // BUG 沒有將 USER_OPERATION 轉換為 REVEAL_RANDOMNESS 的 function 造成死鎖
     function revealRandao()
         external
         onlyOwner
@@ -114,7 +119,12 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Stage 4
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    // TODO
+    function unlock(
+        bytes calldata data
+    ) external onlyOwner timelock(Constants.STAGE_4_UNLOCK) {
+        _pointer = SSTORE2.write(data);
+        _changeStage(Constants.STAGE_0_DEFAULT);
+    }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         View functions
@@ -133,5 +143,18 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
 
     function verifier() external view returns (address) {
         return _verifierAddr;
+    }
+
+    function verify() external view returns (bool) {
+        return IVerifier(_verifierAddr).verify();
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory ret) {
+        uint256 start = (tokenId - 1) * 32;
+        uint256 end = start + 32;
+        uint256 uri = abi.decode(SSTORE2.read(_pointer, start, end), (uint256));
+        ret = LibString.toString(uri);
     }
 }
