@@ -149,8 +149,29 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
         uint[2] calldata pA,
         uint[2][2] calldata pB,
         uint[2] calldata pC,
-        uint[5001] calldata pubSignals
+        uint256 extraRounds,
+        uint256[] calldata originArray,
+        uint256[] calldata afterShuffleArray
     ) external view returns (bool) {
+        uint256 size = originArray.length;
+        require(size == afterShuffleArray.length);
+        require(size * 2 == 50);
+
+        uint256[102] memory pubSignals;
+        {
+            // avoid stack too deep
+            pubSignals[0] = _randao.randomness;
+            pubSignals[1] = extraRounds;
+            uint256 originIndex = 2;
+            uint256 afterIndex = originIndex + 50;
+            for (uint256 i = 0; i < size; ) {
+                pubSignals[originIndex + i] = originArray[i];
+                pubSignals[afterIndex + i] = afterShuffleArray[i];
+                unchecked {
+                    ++i;
+                }
+            }
+        }
         return IVerifier(_verifierAddr).verifyProof(pA, pB, pC, pubSignals);
     }
 
