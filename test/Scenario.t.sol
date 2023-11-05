@@ -47,13 +47,13 @@ contract TestScenario is BaseTest {
         uint256[2] memory a;
         uint256[2][2] memory b;
         uint256[2] memory c;
-        uint256[5001] memory signals;
+        uint256[102] memory signals;
         {
             // avoid stack too deep
             uint256[] memory pA; // size 2
             uint256[][] memory pB; // [2][2]
             uint256[] memory pC; // size 2
-            uint256[] memory pubSignals; // size 5001
+            uint256[] memory pubSignals; // size 102
             string memory root = vm.projectRoot();
             string memory path = string.concat(
                 root,
@@ -73,7 +73,7 @@ contract TestScenario is BaseTest {
             b[1][1] = pB[1][1];
             c[0] = pC[0];
             c[1] = pC[1];
-            for (uint256 i; i < 5001; ++i) {
+            for (uint256 i; i < 102; ++i) {
                 signals[i] = pubSignals[i];
             }
         }
