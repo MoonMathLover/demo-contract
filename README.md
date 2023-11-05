@@ -1,21 +1,23 @@
 # Fisher-yates demo contract
 
-## Spec
-
-- [ ] ERC721
-- [ ] Timelock
-
 ## Stage Lifecycle
 
-###### 1. propose future block number
+###### 1. commit
 
-###### 2. commit verifier
+- future block number
+- verifier's codehash
 
-###### 3. user contributing with swap times
+###### 2. User
 
-###### 4. reveal randomness
+- Users are enabled to purchase ERC721 token.
 
-###### 5. reveal the result of lootbox
+###### 3. reveal
+
+- reveal randomness and verifier.
+
+###### 4. unlock
+
+- unlock lootbox.
 
 ## Reference
 
