@@ -20,7 +20,6 @@ import {Events} from "./utils/Events.sol";
 
 contract DemeDay is Ownable, ERC721, StageTimelock {
     using LibCounter for TypeCounter;
-    using LibRandao for TypeRandao;
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         State Variables
@@ -55,11 +54,11 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Stage 1
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
+    /// @dev `revealRandao` can only be revealed after reaching the future block number
     function commitRandao(
-        uint256 duration,
         uint256 futureBlockNumber
     ) external onlyOwner timelock(Constants.STAGE_1_COMMIT) {
-        _randao.propose(duration, futureBlockNumber);
+        _randao.blockNumber = futureBlockNumber;
         if (_verifierHash != bytes32(0)) {
             _changeStage(Constants.STAGE_2_USER);
         }
@@ -93,12 +92,10 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Stage 3
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    function revealRandao()
-        external
-        onlyOwner
-        timelock(Constants.STAGE_3_REVEAL)
-    {
-        _randao.reveal();
+    function revealRandao(
+        uint256 randomness
+    ) external onlyOwner timelock(Constants.STAGE_3_REVEAL) {
+        _randao.randomness = randomness;
 
         if (_verifierAddr != address(0)) {
             _changeStage(Constants.STAGE_4_UNLOCK);

@@ -46,7 +46,7 @@ contract TestScenario is BaseTest {
     function _stage_1_Operation() private {
         vm.roll(1000); // block.number = 1000
         vm.startPrank(_admin.addr);
-        _demo.commitRandao(0, 5000);
+        _demo.commitRandao(5000);
         _demo.commitVerifier(_verifierCodehash);
         vm.stopPrank();
     }
@@ -68,7 +68,7 @@ contract TestScenario is BaseTest {
         vm.roll(6000); // block.number = 6000
         vm.prevrandao(bytes32(uint256(2664828619369171456))); // block.prevrandao = 2664828619369171456
         vm.startPrank(_admin.addr);
-        _demo.revealRandao();
+        _demo.revealRandao(2664828619369171456);
         _demo.revealVerifier(address(_verifier));
         vm.stopPrank();
     }
