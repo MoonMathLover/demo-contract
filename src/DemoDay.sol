@@ -11,7 +11,7 @@ import {IVerifier} from "./interface/IVerifier.sol";
 
 // library
 import {TypeCounter, LibCounter} from "./library/LibCounter.sol";
-import {TypeRandao} from "./library/LibRandaoForTest.sol";
+import {TypeRandao} from "./library/LibRandao.sol";
 
 // utils
 import {Constants} from "./utils/Constants.sol";
