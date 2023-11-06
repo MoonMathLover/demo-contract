@@ -1,0 +1,5 @@
+#!/bin/bash
+
+RPC_URL=${RPC_URL:-http://127.0.0.1:8545}
+forge script -vvvv ./script/anvil/Demo.s.sol  --rpc-url $RPC_URL --broadcast
+forge script -vvvv ./script/anvil/Verifier.s.sol  --rpc-url $RPC_URL --broadcast

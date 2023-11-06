@@ -11,12 +11,14 @@ import {IVerifier} from "./interface/IVerifier.sol";
 
 // library
 import {TypeCounter, LibCounter} from "./library/LibCounter.sol";
-import {TypeRandao, LibRandao} from "./library/LibRandao.sol";
+import {TypeRandao} from "./library/LibRandaoForTest.sol";
 
 // utils
 import {Constants} from "./utils/Constants.sol";
 import {Errors} from "./utils/Errors.sol";
 import {Events} from "./utils/Events.sol";
+
+// import "forge-std/console.sol";
 
 contract DemeDay is Ownable, ERC721, StageTimelock {
     using LibCounter for TypeCounter;
@@ -85,6 +87,20 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
         }
     }
 
+    function batchMint(
+        uint8 contributionStart,
+        uint8 n
+    ) external payable timelock(Constants.STAGE_2_USER) {
+        uint8 c = contributionStart;
+        for (uint256 i = 0; i < n; i++) {
+            _safeMint(msg.sender, _counter.increase());
+            unchecked {
+                _userContributeSwapTimes += uint256(c);
+            }
+            c++;
+        }
+    }
+
     function closeSales() external onlyOwner timelock(Constants.STAGE_2_USER) {
         _changeStage(Constants.STAGE_3_REVEAL);
     }
@@ -92,7 +108,7 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Stage 3
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    function revealRandao(
+    function revealRandaoForTest(
         uint256 randomness
     ) external onlyOwner timelock(Constants.STAGE_3_REVEAL) {
         _randao.randomness = randomness;
@@ -102,10 +118,34 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
         }
     }
 
+    function revealRandao()
+        external
+        onlyOwner
+        timelock(Constants.STAGE_3_REVEAL)
+    {
+        require(
+            _randao.blockNumber < block.number,
+            "reveal randomness in lock time"
+        );
+
+        _randao.randomness = block.prevrandao;
+
+        if (_verifierAddr != address(0)) {
+            _changeStage(Constants.STAGE_4_UNLOCK);
+        }
+    }
+
     function revealVerifier(
         address addr
     ) external onlyOwner timelock(Constants.STAGE_3_REVEAL) {
+        // console.log("revealVerifier: addr:", addr);
+        // console.log("revealVerifier: addr.codehash:");
+        // console.logBytes32(addr.codehash);
+        // console.log("revealVerifier: _verifierHash:");
+        // console.logBytes32(_verifierHash);
+        // console.log("revealVerifier: pre addr.codehash == _verifierHash");
         require(addr.codehash == _verifierHash);
+        // console.log("revealVerifier: post addr.codehash == _verifierHash");
         _verifierAddr = addr;
 
         if (_randao.randomness != 0) {
@@ -114,13 +154,13 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
-        Stage 4
+        Stage 4STAGE_5_FINISHED
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function unlock(
         bytes calldata data
     ) external onlyOwner timelock(Constants.STAGE_4_UNLOCK) {
         _pointer = SSTORE2.write(data);
-        _changeStage(Constants.STAGE_0_DEFAULT);
+        _changeStage(Constants.STAGE_5_FINISHED);
     }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
@@ -128,6 +168,18 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function stage() external view returns (uint8) {
         return _currentStage();
+    }
+
+    function randaoBlockNumber() public view returns (uint256) {
+        return _randao.blockNumber;
+    }
+
+    function verifierCodeHash() public view returns (bytes32) {
+        return _verifierHash;
+    }
+
+    function mintCounter() public view returns (uint256) {
+        return _counter.current();
     }
 
     function userContributeSwapTimes() external view returns (uint256) {
@@ -147,12 +199,15 @@ contract DemeDay is Ownable, ERC721, StageTimelock {
         uint[2][2] calldata pB,
         uint[2] calldata pC,
         uint256 extraRounds,
-        uint256[] calldata originArray,
-        uint256[] calldata afterShuffleArray
+        uint256[50] calldata originArray,
+        uint256[50] calldata afterShuffleArray
     ) external view returns (bool) {
         uint256 size = originArray.length;
-        require(size == afterShuffleArray.length);
-        require(size * 2 == 50);
+        require(
+            size == afterShuffleArray.length,
+            "original and afterShuffle array must be of same size"
+        );
+        require(size == 50, "array size must be 50");
 
         uint256[102] memory pubSignals;
         {

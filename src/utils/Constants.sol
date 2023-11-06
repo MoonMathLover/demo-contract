@@ -12,4 +12,6 @@ library Constants {
     uint8 constant STAGE_3_REVEAL = 3;
     /// @dev unlock lootbox result
     uint8 constant STAGE_4_UNLOCK = 4;
+    /// @dev closed
+    uint8 constant STAGE_5_FINISHED = 5;
 }
